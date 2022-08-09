@@ -1,3 +1,5 @@
+pub mod eratosthenes;
+
 pub struct Primes {
     curr: u32,
     generated_primes: Vec<u32>,
