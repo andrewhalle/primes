@@ -1,11 +1,9 @@
 /// Generate a list of prime numbers up to the given limit, inclusive.
 ///
 /// This uses the [Sieve of Eratosthenes](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes)
-fn primes(limit: u64) -> Vec<u64> {
+pub fn primes(limit: u64) -> Vec<u64> {
     // We will let Somes represent candidates for primes, and Nones be known non-primes.
-    let mut candidates: Vec<u64> = (2..limit + 1)
-        .into_iter()
-        .collect();
+    let mut candidates: Vec<u64> = (2..limit + 1).into_iter().collect();
 
     // Filter out non-prime numbers.
     for i in 0..candidates.len() {
