@@ -1,18 +1,49 @@
-use std::collections::HashMap;
-use std::iter::StepBy;
-use std::ops::RangeFrom;
-
 pub struct Primes {
     curr: u32,
-    iters: HashMap<u32, Vec<StepBy<RangeFrom<u32>>>>,
+    generated_primes: Vec<u32>,
 }
 
 impl Primes {
     pub fn new() -> Self {
+        let mut generated_primes = Vec::with_capacity(1024);
+        generated_primes.push(2);
+        generated_primes.push(3);
+        generated_primes.push(5);
+        generated_primes.push(7);
+
         Self {
             curr: 2,
-            iters: Default::default(),
+            generated_primes,
         }
+    }
+
+    fn frontload(&mut self) -> Option<u32> {
+        let (retval, new) = match self.curr {
+            2 => (Some(2), 3),
+            3 => (Some(3), 5),
+            5 => (Some(5), 7),
+            7 => (Some(7), 11),
+            _ => unreachable!(),
+        };
+
+        self.curr = new;
+
+        retval
+    }
+
+    fn check(&self) -> bool {
+        let limit = (self.curr as f64).sqrt() as u32;
+        for val in &self.generated_primes {
+            if *val > limit {
+                break;
+            }
+
+            if self.curr % *val == 0 {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
 
@@ -20,25 +51,18 @@ impl Iterator for Primes {
     type Item = u32;
 
     fn next(&mut self) -> Option<Self::Item> {
-        while self.iters.contains_key(&self.curr) {
-            // This .unwrap() is safe because we checked .contains_key() above.
-            let iters = self.iters.remove(&self.curr).unwrap();
-            for mut iter in iters {
-                // This .unwrap() is safe because our iterators never end, by
-                // construction.
-                let next = iter.next().unwrap();
-                let entry = self.iters.entry(next).or_default();
-                entry.push(iter);
-            }
+        if self.curr <= 7 {
+            return self.frontload();
+        }
+
+        while !self.check() {
             self.curr += 1;
         }
 
-        // self.curr is prime, so add an iter for it.
-        let entry = self.iters.entry(self.curr * 2).or_default();
-        entry.push((self.curr * 3..).step_by(self.curr as usize));
-
+        self.generated_primes.push(self.curr);
         let retval = Some(self.curr);
         self.curr += 1;
+
         retval
     }
 }
