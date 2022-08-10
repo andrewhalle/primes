@@ -1,3 +1,5 @@
+use std::fmt;
+
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 
 use primes::{
@@ -7,43 +9,94 @@ use primes::{
     Primes,
 };
 
+struct Input {
+    largest_prime: u64,
+    largest_prime_index: usize,
+    search_space: u64,
+}
+
+impl Input {
+    fn new(search_space: u64) -> Self {
+        let primes = skip_2::primes(search_space);
+
+        Self {
+            largest_prime: *primes.last().unwrap(),
+            largest_prime_index: primes.len(),
+            search_space,
+        }
+    }
+}
+
+impl fmt::Display for Input {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.search_space)
+    }
+}
+
 fn bench_em(c: &mut Criterion) {
     let mut group = c.benchmark_group("Primes");
-    // For each tuple, the first number is the largest prime number we will search for for
-    // eratosthenes-based algorithms and the second number is the index of that same prime
-    // in an array of prime numbers.
-    for i in [(821641, 65536), (9999991, 664579), (499999993, 26355867)].iter() {
-        group.bench_with_input(BenchmarkId::new("division", i.1), i, |b, i| {
+
+    // Each number in this list defines a search space in which we will record the largest prime
+    // and the index of that prime
+    for i in [
+        10,
+        100,
+        1_000,
+        10_000,
+        100_000,
+        1_000_000,
+        10_000_000,
+        100_000_000,
+        500_000_000,
+    ]
+    .iter()
+    {
+        let input = Input::new(*i);
+
+        group.bench_with_input(BenchmarkId::new("division", &input), &input, |b, input| {
             b.iter(|| {
-                let _: Vec<u32> = Primes::new().take(i.1).collect();
+                let _: Vec<u32> = Primes::new().take(input.largest_prime_index).collect();
             })
         });
-        group.bench_with_input(BenchmarkId::new("live_first_prime", i.1), i, |b, i| {
+        group.bench_with_input(
+            BenchmarkId::new("live_first_prime", &input),
+            &input,
+            |b, input| {
+                b.iter(|| {
+                    let _: Vec<u64> = LiveFirstPrimes::new()
+                        .take(input.largest_prime_index)
+                        .collect();
+                })
+            },
+        );
+        group.bench_with_input(
+            BenchmarkId::new("live_second_prime", &input),
+            &input,
+            |b, input| {
+                b.iter(|| {
+                    let _: Vec<u64> = LiveSecondPrimes::new()
+                        .take(input.largest_prime_index)
+                        .collect();
+                })
+            },
+        );
+        group.bench_with_input(BenchmarkId::new("sieve_og", &input), &input, |b, input| {
             b.iter(|| {
-                let _: Vec<u64> = LiveFirstPrimes::new().take(i.1).collect();
+                let _ = og::primes(input.largest_prime);
             })
         });
-        group.bench_with_input(BenchmarkId::new("live_second_prime", i.1), i, |b, i| {
-            b.iter(|| {
-                let _: Vec<u64> = LiveSecondPrimes::new().take(i.1).collect();
-            })
-        });
-        group.bench_with_input(BenchmarkId::new("sieve_og", i.0), i, |b, i| {
-            b.iter(|| {
-                let _ = og::primes(i.0);
-            })
-        });
-        group.bench_with_input(BenchmarkId::new("sieve_skip_2", i.0), i, |b, i| {
-            b.iter(|| {
-                let _ = skip_2::primes(i.0);
-            })
-        });
+        group.bench_with_input(
+            BenchmarkId::new("sieve_skip_2", &input),
+            &input,
+            |b, input| {
+                b.iter(|| {
+                    let _ = skip_2::primes(input.largest_prime);
+                })
+            },
+        );
     }
     group.finish();
 }
 
-criterion_group!(
-    all,
-    bench_em,
-);
+criterion_group!(all, bench_em);
 criterion_main!(all);
