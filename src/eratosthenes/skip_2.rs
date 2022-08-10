@@ -3,7 +3,7 @@ use std::num::NonZeroU64;
 /// Generate a list of prime numbers up to the given limit, inclusive.
 ///
 /// This uses the [Sieve of Eratosthenes](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes)
-fn primes(limit: u64) -> Vec<u64> {
+pub fn primes(limit: u64) -> Vec<u64> {
     // We will let Somes represent candidates for primes, and Nones be known non-primes.
     let mut candidates: Vec<Option<NonZeroU64>> = (2..limit + 1)
         .into_iter()
@@ -33,7 +33,10 @@ fn primes(limit: u64) -> Vec<u64> {
     }
 
     // At this point, all the Somes are confirmed primes. Filter out the Nones and return them.
-    candidates.into_iter().filter_map(|i| i.map(|i| i.get())).collect()
+    candidates
+        .into_iter()
+        .filter_map(|i| i.map(|i| i.get()))
+        .collect()
 }
 
 #[cfg(test)]
