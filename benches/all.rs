@@ -3,6 +3,7 @@ use criterion::{criterion_group, criterion_main, Criterion};
 use primes::{
     eratosthenes::{og, skip_2},
     live::first::Primes as LiveFirstPrimes,
+    live::second::Primes as LiveSecondPrimes,
     Primes,
 };
 
@@ -16,6 +17,14 @@ fn live_first_primes(c: &mut Criterion) {
     c.bench_function("live_first_primes", |b| {
         b.iter(|| {
             let _: Vec<u64> = LiveFirstPrimes::new().take(LARGEST_PRIME_INDEX).collect();
+        })
+    });
+}
+
+fn live_second_primes(c: &mut Criterion) {
+    c.bench_function("live_second_primes", |b| {
+        b.iter(|| {
+            let _: Vec<u64> = LiveSecondPrimes::new().take(LARGEST_PRIME_INDEX).collect();
         })
     });
 }
@@ -47,6 +56,7 @@ fn test_division(c: &mut Criterion) {
 criterion_group!(
     all,
     live_first_primes,
+    live_second_primes,
     test_division,
     sieve_og,
     sieve_skip_2
