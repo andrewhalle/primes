@@ -1,4 +1,5 @@
 pub mod eratosthenes;
+pub mod live;
 
 pub struct Primes {
     curr: u32,
