@@ -7,9 +7,10 @@ use primes::{
 };
 
 // The largest prime number we will search for for eratosthenes-based algorithms.
-const LARGEST_PRIME_TO_SEARCH: u64 = 9999991;
+const LARGEST_PRIME_TO_SEARCH: u64 = 821641;
+
 // The index of LARGEST_PRIME_TO_SEARCH in an array of prime numbers.
-const LARGEST_PRIME_INDEX: usize = 664579;
+const LARGEST_PRIME_INDEX: usize = 65536;
 
 fn live_first_primes(c: &mut Criterion) {
     c.bench_function("live_first_primes", |b| {
@@ -43,5 +44,11 @@ fn test_division(c: &mut Criterion) {
     });
 }
 
-criterion_group!(all, live_first_primes, test_division, sieve_og, sieve_skip_2);
+criterion_group!(
+    all,
+    live_first_primes,
+    test_division,
+    sieve_og,
+    sieve_skip_2
+);
 criterion_main!(all);
