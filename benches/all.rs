@@ -1,6 +1,7 @@
 use std::fmt;
 
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
+use primal::{Primes as PrimalPrimes, Sieve as PrimalSieve};
 
 use primes::{
     eratosthenes::{og, skip_2},
@@ -53,6 +54,28 @@ fn bench_em(c: &mut Criterion) {
     {
         let input = Input::new(*i);
 
+        group.bench_with_input(
+            BenchmarkId::new("primal_primes", &input),
+            &input,
+            |b, input| {
+                b.iter(|| {
+                    let _: Vec<_> = PrimalPrimes::all()
+                        .take(input.largest_prime_index)
+                        .collect();
+                })
+            },
+        );
+        group.bench_with_input(
+            BenchmarkId::new("primal_sieve", &input),
+            &input,
+            |b, input| {
+                b.iter(|| {
+                    let _: Vec<_> = PrimalSieve::new(input.largest_prime as usize)
+                        .primes_from(2)
+                        .collect();
+                })
+            },
+        );
         group.bench_with_input(BenchmarkId::new("division", &input), &input, |b, input| {
             b.iter(|| {
                 let _: Vec<u32> = Primes::new().take(input.largest_prime_index).collect();
