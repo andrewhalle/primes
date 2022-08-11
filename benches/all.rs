@@ -1,7 +1,6 @@
 use std::fmt;
 
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
-use primal::{Primes as PrimalPrimes, Sieve as PrimalSieve};
 
 use primes::{
     eratosthenes::{og, skip_2},
@@ -18,10 +17,12 @@ struct Input {
 
 impl Input {
     fn new(search_space: u64) -> Self {
-        let primes = skip_2::primes(search_space);
+        let primes: Vec<_> = primal::Sieve::new(search_space as usize)
+            .primes_from(2)
+            .collect();
 
         Self {
-            largest_prime: *primes.last().unwrap(),
+            largest_prime: *primes.last().unwrap() as u64,
             largest_prime_index: primes.len(),
             search_space,
         }
@@ -59,7 +60,7 @@ fn bench_em(c: &mut Criterion) {
             &input,
             |b, input| {
                 b.iter(|| {
-                    let _: Vec<_> = PrimalPrimes::all()
+                    let _: Vec<_> = primal::Primes::all()
                         .take(input.largest_prime_index)
                         .collect();
                 })
@@ -70,8 +71,19 @@ fn bench_em(c: &mut Criterion) {
             &input,
             |b, input| {
                 b.iter(|| {
-                    let _: Vec<_> = PrimalSieve::new(input.largest_prime as usize)
+                    let _: Vec<_> = primal::Sieve::new(input.largest_prime as usize)
                         .primes_from(2)
+                        .collect();
+                })
+            },
+        );
+        group.bench_with_input(
+            BenchmarkId::new("primal_streaming_sieve", &input),
+            &input,
+            |b, input| {
+                b.iter(|| {
+                    let _: Vec<_> = (1..input.largest_prime_index)
+                        .map(|i| primal::StreamingSieve::nth_prime(i as usize))
                         .collect();
                 })
             },
