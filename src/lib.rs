@@ -20,20 +20,6 @@ impl Primes {
         }
     }
 
-    fn frontload(&mut self) -> Option<u32> {
-        let (retval, new) = match self.curr {
-            2 => (Some(2), 3),
-            3 => (Some(3), 5),
-            5 => (Some(5), 7),
-            7 => (Some(7), 11),
-            _ => unreachable!(),
-        };
-
-        self.curr = new;
-
-        retval
-    }
-
     fn check(&self) -> bool {
         let limit = (self.curr as f64).sqrt() as u32;
         for val in &self.generated_primes {
@@ -54,10 +40,6 @@ impl Iterator for Primes {
     type Item = u32;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.curr <= 7 {
-            return self.frontload();
-        }
-
         while !self.check() {
             self.curr += 1;
         }
