@@ -3,7 +3,7 @@ use std::fmt;
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 
 use primes::{
-    eratosthenes::{og, skip_2},
+    eratosthenes::{bit_vector, og, skip_2},
     live::first::Primes as LiveFirstPrimes,
     live::second::Primes as LiveSecondPrimes,
     Primes,
@@ -126,6 +126,15 @@ fn bench_em(c: &mut Criterion) {
             |b, input| {
                 b.iter(|| {
                     let _ = skip_2::primes(input.largest_prime);
+                })
+            },
+        );
+        group.bench_with_input(
+            BenchmarkId::new("bit_vector", &input),
+            &input,
+            |b, input| {
+                b.iter(|| {
+                    let _ = bit_vector::primes(input.largest_prime);
                 })
             },
         );
