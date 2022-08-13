@@ -2,7 +2,6 @@
 ///
 /// This uses the [Sieve of Eratosthenes](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes)
 pub fn primes(limit: u64) -> Vec<u64> {
-    // We will let Somes represent candidates for primes, and Nones be known non-primes.
     let mut candidates: Vec<u64> = (2..limit + 1).into_iter().collect();
 
     // Filter out non-prime numbers.
